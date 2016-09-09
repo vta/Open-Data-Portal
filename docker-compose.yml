@@ -1,0 +1,30 @@
+version: '2'
+services:
+  web:
+    container_name : ckan_web
+    build: ./web/
+    ports:
+     - "5000:5000"
+    env_file:
+     - ./secrets.env
+    volumes:
+     - ./data/ckan_storage:/var/lib/postgresql/data/ckan
+    depends_on:
+     - db
+     - solr
+  db:
+    container_name : ckan_db
+    build: ./db/
+    ports:
+     - "5432:5432"
+    volumes:
+     - ./data/ckandb:/var/lib/postgresql/data/ckan
+    environment:
+     - PGDATA=/var/lib/postgresql/data/ckan
+    env_file:
+     - ./secrets.env
+  solr:
+    container_name : ckan_solr
+    build: ./solr/
+    ports:
+     - "8983:8983"
