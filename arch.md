@@ -30,6 +30,9 @@ can set this up with multiple administrators to the subscription or parts of the
 Azure Storage
 1 TB = $24/mo
 
+https://github.com/chgeuer/postgres-azure
+
+
 
 
 power vi 
@@ -47,3 +50,21 @@ Phase 2 introduces more web servers with a load balancer, and would come into pl
 Phase 3 (not drawn) would introduce more databases in either a replicated/clustered configuration or with database sharding, and would be used if/when we observe excessive load on the database.
 
 Each CKAN web server is recommended to have 2 CPU cores, 4 GB of RAM, and 60 GB of disk space.
+
+
+
+A2 standard allows for auto-scaling
+A2 basic does not have auto-scaling
+
+D11 V2 VM for the database
+
+
+
+# Cloud storage extension
+https://github.com/DataShades/ckanext-cloudconnector
+
+# Dev pays
+amazon feature to let developers who need to access the data frequently pay for the bandwidth they use
+https://aws.amazon.com/devpay/
+
+

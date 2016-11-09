@@ -1,3 +1,4 @@
 data/ckan_storage/*
 data/ckandb/*
 secrets.env
+production.ini

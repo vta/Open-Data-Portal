@@ -37,12 +37,30 @@ and should contain:
     Disallow: /
 
 
+timeline?
+Michelle (c4sj is now going to be working with us for the city)
+
+
+
+
+hurdles
+------------
+ - established data storage through azure? no - check with Kevin
+ - UX design, implementation
+ - is the API side update an append? or is it a replace?
+ - ckan community?
+ - data preview
+
+
+
+
+
 
 example of regional data portal: opendatapilly.org
 
 
 
-# arcitecture
+# architecture
  - disater recovery
  - automation
 

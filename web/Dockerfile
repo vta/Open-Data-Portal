@@ -19,15 +19,16 @@ RUN sudo chown -R `whoami` /usr/lib/ckan/default
 
 WORKDIR /usr/lib/ckan/default
 
-RUN pip install -e 'git+https://github.com/ckan/ckan.git@ckan-2.5.2#egg=ckan'
+RUN virtualenv --no-site-packages /usr/lib/ckan/default
+RUN . /usr/lib/ckan/default/bin/activate
+
+RUN pip install -e 'git+https://github.com/ckan/ckan.git@ckan-2.6.0#egg=ckan'
 RUN pip install -r /usr/lib/ckan/default/src/ckan/requirements.txt
 
 
 RUN sudo mkdir -p /etc/ckan/
 RUN sudo chown -R `whoami` /etc/ckan/
 
-RUN virtualenv --no-site-packages /usr/lib/ckan/default
-RUN . /usr/lib/ckan/default/bin/activate
 
 
 RUN paster make-config ckan /etc/ckan/default/development.ini
@@ -36,19 +37,19 @@ RUN ln -s /etc/ckan/default/development.ini /etc/ckan/default/production.ini
 COPY resources/apache.wsgi /etc/ckan/default/apache.wsgi
 
 
-# create the database
+# initializes the database
 # cd /usr/lib/ckan/default/src/ckan
 # paster db init -c /etc/ckan/default/production.ini
 
+
 RUN ln -s /usr/lib/ckan/default/src/ckan/who.ini /etc/ckan/default/who.ini
-
-
 
 WORKDIR /usr/lib/ckan/default/src/ckan
 
-EXPOSE 5000
-# CMD [ "paster", "serve", "/etc/ckan/default/production.ini"]
+EXPOSE 8080
 
-COPY resources/wait_for_start.sh /usr/lib/ckan/wait_for_start.sh
-RUN chmod +x /usr/lib/ckan/wait_for_start.sh
-CMD [ "/usr/lib/ckan/wait_for_start.sh"]
+# COPY resources/wait_for_start.sh /usr/lib/ckan/wait_for_start.sh
+# RUN chmod +x /usr/lib/ckan/wait_for_start.sh
+# CMD [ "/usr/lib/ckan/wait_for_start.sh"]
+
+CMD [ "paster", "serve", "/etc/ckan/default/production.ini"]
