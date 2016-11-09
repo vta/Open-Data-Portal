@@ -1,5 +1,6 @@
-# VTA CKAN
+[![Stories in Ready](https://badge.waffle.io/vta/Open-Data-Portal.svg?label=ready&title=Ready)](http://waffle.io/vta/Open-Data-Portal)
 
+# Open Data Portal
 
 
 http://docs.ckan.org/en/latest/maintaining/installing/install-from-source.html
