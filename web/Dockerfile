@@ -31,9 +31,8 @@ RUN sudo chown -R `whoami` /etc/ckan/
 
 
 
-RUN paster make-config ckan /etc/ckan/default/development.ini
-COPY resources/development.ini /etc/ckan/default/development.ini
-RUN ln -s /etc/ckan/default/development.ini /etc/ckan/default/production.ini
+RUN paster make-config ckan /etc/ckan/default/production.ini
+COPY resources/production.ini /etc/ckan/default/production.ini
 COPY resources/apache.wsgi /etc/ckan/default/apache.wsgi
 
 
