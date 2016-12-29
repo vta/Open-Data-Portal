@@ -1,7 +1,7 @@
 version: '2'
 services:
-  web:
-    container_name : ckan_web
+  ckan:
+    container_name : ckan
     build: ./web/
     entrypoint: ./web/docker-entrypoint.sh
     ports:

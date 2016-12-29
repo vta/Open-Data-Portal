@@ -22,8 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
   python-pip \
   python-virtualenv \
-  virtualenvwrapper \
-  requests
+  virtualenvwrapper
 
 RUN mkdir -p /usr/lib/ckan/default
 RUN chown -R `whoami` /usr/lib/ckan/default
@@ -61,4 +60,3 @@ EXPOSE 8080
 # RUN chmod +x /usr/lib/ckan/wait_for_start.sh
 # CMD [ "/usr/lib/ckan/wait_for_start.sh"]
 
-CMD [ "paster", "serve", "/etc/ckan/default/production.ini"]
