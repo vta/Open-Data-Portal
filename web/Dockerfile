@@ -21,15 +21,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libpq-dev \
   build-essential \
   python-pip \
-  python-virtualenv \
-  virtualenvwrapper
+  python-virtualenv
 
 RUN mkdir -p /usr/lib/ckan/default
 RUN chown -R `whoami` /usr/lib/ckan/default
 
 WORKDIR /usr/lib/ckan/default
 
-RUN /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh"
 
 RUN virtualenv --no-site-packages /usr/lib/ckan/default
 
