@@ -8,38 +8,45 @@ MAINTAINER  Kyle Falconer "kyle.falconer@vta.org"
 RUN locale-gen en_US.UTF-8 && \
 echo 'LANG="en_US.UTF-8"' > /etc/default/locale
 ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en  
+ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # CKAN - Web
 # install deps
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
   postgresql-client \
   git-core \
-  python-dev \
   libpq-dev \
-  build-essential \
-  python-pip \
-  python-virtualenv
+  python-setuptools \
+  python-dev \
+  build-essential
 
-RUN mkdir -p /usr/lib/ckan/default
-RUN chown -R `whoami` /usr/lib/ckan/default
+RUN easy_install pip
+RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
+RUN pip install --upgrade virtualenv
+RUN pip install --upgrade sqlalchemy-migrate
+RUN pip install virtualenvwrapper
+
+RUN /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh"
+
+RUN mkdir -p /usr/lib/ckan/default && chown -R `whoami` /usr/lib/ckan/default
 
 WORKDIR /usr/lib/ckan/default
-
 
 RUN virtualenv --no-site-packages /usr/lib/ckan/default
 
 RUN . /usr/lib/ckan/default/bin/activate
 
 RUN pip install -e 'git+https://github.com/ckan/ckan.git@ckan-2.6.0#egg=ckan'
+#RUN git clone --branch ckan-2.6.0 https://github.com/ckan/ckan.git
 
 RUN pip install -r /usr/lib/ckan/default/src/ckan/requirements.txt
 
 RUN mkdir -p /etc/ckan/ && chown -R `whoami` /etc/ckan/
 
-COPY resources/production.ini /etc/ckan/default/production.ini
+COPY ./resources/production.ini /etc/ckan/default/production.ini
 
 RUN pip install ckanext-geoview
 
@@ -58,3 +65,5 @@ EXPOSE 8080
 # RUN chmod +x /usr/lib/ckan/wait_for_start.sh
 # CMD [ "/usr/lib/ckan/wait_for_start.sh"]
 
+COPY ./docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh

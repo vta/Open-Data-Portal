@@ -5,19 +5,24 @@
 
 checkDB () {
   # Check if the DB is live
-  psql -d "$DATABASE_URL"
+  psql \
+   --host=$POSTGRES_HOST \
+   --port=$POSTGRES_PORT \
+   --username=$POSTGRES_USER \
+   --dbname=$POSTGRES_CKAN_DATASTORE_DBNAME
 }
 
 checkDB
 
 while [ $? -gt 0 ]; do
   echo 'DB not ready waiting 10 seconds'
-	sleep 10
-	checkDB
+  sleep 10
+  checkDB
 done
-cd /usr/lib/ckan/default/src/ckan && paster db init -c /etc/ckan/default/default.ini
-paster --plugin=ckanext-harvest harvester initdb --config=/etc/ckan/default/default.ini
+cd /usr/lib/ckan/default/src/ckan
+paster db init -c /etc/ckan/default/production.ini
+# paster --plugin=ckanext-harvest harvester initdb --config=/etc/ckan/default/production.ini
 
-echo "starting server"
+echo "starting CKAN server"
 
-exec paster serve /etc/ckan/default/default.ini
+paster serve /etc/ckan/default/production.ini
