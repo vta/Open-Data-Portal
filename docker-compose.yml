@@ -1,5 +1,11 @@
 version: '2'
 services:
+  nginx:
+    image: nginx:1.11.8
+    ports:
+     - "80:80"
+    volumes:
+     - ./nginx/odp.conf:/etc/nginx/conf.d/default.conf
   ckan:
     container_name : ckan
     build: ./web/
