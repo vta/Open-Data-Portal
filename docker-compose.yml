@@ -34,9 +34,16 @@ services:
        CKAN_SITE_URL: "${CKAN_SITE_URL}"
        CKAN_SITE_ID: "default"
        CKAN_STORAGE_PATH: "/var/lib/ckan"
-       CKAN_DATAPUSHER_URL: "http://127.0.0.1:8800/"
+       CKAN_DATAPUSHER_URL: "${CKAN_SITE_URL}:8800"
        CKAN_SOLR_URL: "http://solr:8983/solr/${POSTGRES_CKAN_DBNAME}"
        SOLR_URL: "http://solr:8983/solr/${POSTGRES_CKAN_DBNAME}"
+  datapusher:
+    container_name: ckan_datapusher
+    build: ./datapusher/
+    ports:
+     - "8800:8800"
+    depends_on:
+     - ckan
   solr:
     image: ckan/solr:latest
     ports:
