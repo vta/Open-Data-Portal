@@ -1,1 +1,3 @@
-secrets.env
+# this file is used by docker-compose
+# and contains secrets like database passwords
+.env

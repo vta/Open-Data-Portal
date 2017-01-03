@@ -2,6 +2,8 @@ version: '2'
 services:
   nginx:
     image: nginx:1.11.8
+    depends_on:
+     - ckan
     ports:
      - "80:80"
     volumes:
@@ -12,8 +14,6 @@ services:
     entrypoint: /docker-entrypoint.sh
     ports:
      - "8080:8080"
-    env_file:
-     - ./secrets.env
     volumes:
      - ./data/ckan_storage:/var/lib/postgresql/data/ckan
     depends_on:
