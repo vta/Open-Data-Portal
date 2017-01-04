@@ -63,12 +63,6 @@ RUN python setup.py install
 WORKDIR /usr/lib/ckan/default
 RUN pip install ckanext-pdfview
 
-# CKAN CloudConnector plugin
-WORKDIR /usr/lib/ckan/
-RUN git clone https://github.com/DataShades/ckanext-cloudconnector.git
-WORKDIR /usr/lib/ckan/ckanext-cloudconnector/
-RUN git checkout 1f4b7ea416aa57b9bd75841c21e067095e327b02
-RUN python setup.py install
 
 RUN ln -s /usr/lib/ckan/default/src/ckan/who.ini /etc/ckan/default/who.ini
 
