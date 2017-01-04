@@ -50,10 +50,25 @@ COPY ./resources/production.ini /etc/ckan/default/production.ini
 
 RUN pip install ckanext-geoview
 
-# initializes the database
-# cd /usr/lib/ckan/default/src/ckan
-# paster db init -c /etc/ckan/default/production.ini
+# ckanext-mapviews plugin
+# there are no release labels for this, so work only on a known-good commit
+WORKDIR /usr/lib/ckan/
+RUN git clone https://github.com/ckan/ckanext-mapviews.git
+WORKDIR /usr/lib/ckan/ckanext-mapviews/
+RUN git checkout 9dc4c9315a2fe6a3adb0a9c9556f00855c6d8be6
+RUN python setup.py install
 
+# PDF View plugin
+# https://github.com/ckan/ckanext-pdfview
+WORKDIR /usr/lib/ckan/default
+RUN pip install ckanext-pdfview
+
+# CKAN CloudConnector plugin
+WORKDIR /usr/lib/ckan/
+RUN git clone https://github.com/DataShades/ckanext-cloudconnector.git
+WORKDIR /usr/lib/ckan/ckanext-cloudconnector/
+RUN git checkout 1f4b7ea416aa57b9bd75841c21e067095e327b02
+RUN python setup.py install
 
 RUN ln -s /usr/lib/ckan/default/src/ckan/who.ini /etc/ckan/default/who.ini
 
