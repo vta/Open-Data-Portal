@@ -3,81 +3,152 @@
 # Open Data Portal
 
 
-http://docs.ckan.org/en/latest/maintaining/installing/install-from-source.html
-
-http://docs.ckan.org/en/latest/maintaining/installing/deployment.html
 
 
-dataproxy extension:
-http://extensions.ckan.org/extension/dataproxy/
+## PostgreSQL Database deployment to Amazon RDS
+Deployed using Amazon's RDS PostgreSQL service.
+
+Currently using a db.m4.large instance for PostgreSQL (2 vCPU, 8GB RAM), with 500GB storage allocated. Refer to the [RDS pricing sheet](https://aws.amazon.com/rds/pricing/).
+
+* DB Instance Identifier : ckandb
+* Master Username : ckandb_admin
+* Master Password : feP?U8AHaf&2e%re5eCha4?Z
+* DB Parameter Group : default.postgres9.5
+* Database Name : ckan
+* Database Port : 5432
+* Backup Retention Period: 7 days
+* Backup Window: Start Time: 08:00 UTC (midnight Pacific Time),duration: 2 hours
+* Auto Minor Version Upgrade: Yes
+
+connection string:
+`User=ckandb_admin, Schema=public, URL=jdbc:postgresql://ckandb.somehost.us-west-2.rds.amazonaws.com:5432/ckan`
+
+*Note:* For debugging purposes, it may be useful to open up the security groups to allow connections from any IP address to port 5432. For more information or if connection attempts to the database fails, check out [the Connecting to a DB Instance Running the PostgreSQL Database Engine documentation](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToPostgreSQLInstance.html).
+
+### Create DataStore Database
+Create a database called datastore_default and a user called datastore_default with read-only access to that database.
+
+```
+# connect to the database then grant access to user
+psql  --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER --dbname=$POSTGRES_CKAN_DBNAME
+GRANT CONNECT ON DATABASE datastore_default TO datastore_default;
+GRANT USAGE ON SCHEMA public TO datastore_default;
+
+\connect datastore_default
+
+-- revoke permissions for the read-only user
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+
+GRANT CREATE ON SCHEMA public TO "ckandb_admin";
+GRANT USAGE ON SCHEMA public TO "ckandb_admin";
+
+GRANT CREATE ON SCHEMA public TO "ckandb_admin";
+GRANT USAGE ON SCHEMA public TO "ckandb_admin";
+
+-- take connect permissions from main db
+REVOKE CONNECT ON DATABASE "ckan" FROM "datastore_default";
+
+-- grant select permissions for read-only user
+GRANT CONNECT ON DATABASE "datastore_default" TO "datastore_default";
+GRANT USAGE ON SCHEMA public TO "datastore_default";
+
+-- grant access to current tables and views to read-only user
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO "datastore_default";
+
+-- grant access to new tables and views by default
+ALTER DEFAULT PRIVILEGES FOR USER "ckandb_admin" IN SCHEMA public
+   GRANT SELECT ON TABLES TO "datastore_default";
+```
+
+## CKAN
+Amazon EC2 Instance using Ubuntu 16.04 on a t2.medium
+* vpc-69f1f10c subnet
+* vta_open_data IAM role
+* 16 GB EBS GP2 SSD storage
+* SSH (22), HTTP (80), HTTPS (443) ports opened
+* opendata_prod key pair
+
+### Protect access to database
+Once the Amazon EC2 instance is set up, note its IP address and set the RDS Security Group's inbound rules to allow access to port 5432 only from the CKAN instance's IP address.
 
 
-http://docs.ckan.org/en/latest/maintaining/data-viewer.html
+### Install dependencies
 
-datapusher installation:
-http://docs.ckan.org/projects/datapusher/en/latest/deployment.html
+To  ssh into the instance:
+copy opendata_prod.pem to ~/.ssh/opendata_prod.pem
+```
+chmod 0400 ~/.ssh/opendata_prod.pem
+ssh -i ~/.ssh/opendata_prod.pem ubuntu@some-instance.us-west-2.compute.amazonaws.com
+```
 
-theming:
-http://docs.ckan.org/en/ckan-2.2.3/theming.html
+Follow [these instructions for installing Docker on Ubuntu 16.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04):
+```
+sudo apt-get update
+sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+sudo apt-add-repository 'deb https://apt.dockerproject.org/repo ubuntu-xenial main'
+sudo apt-get update
+sudo apt-get install -y docker-engine
+sudo usermod -aG docker $(whoami)
+```
 
+Now [install docker-compose](https://docs.docker.com/compose/install/):
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
 
-
-Postfix is now set up with a default configuration.  If you need to make
-changes, edit
-/etc/postfix/main.cf (and others) as needed.  To view Postfix configuration
-values, see postconf(1).
-
-After modifying main.cf, be sure to run '/etc/init.d/postfix reload'.
-
-
-the robots file for development should be at:
-src/ckan/ckan/public/robots.txt
-and should contain:
-
-    User-agent: *
-    Disallow: /
-
-
-timeline?
-Michelle (c4sj is now going to be working with us for the city)
+Log out and then log back in to complete the process (the group assignment needs to take effect).
 
 
+### Deploy the project
 
-
-hurdles
-------------
- - established data storage through azure? no - check with Kevin
- - UX design, implementation
- - is the API side update an append? or is it a replace?
- - ckan community?
- - data preview
+git clone https://github.com/vta/Open-Data-Portal
 
 
 
 
+#### Environment Variables
+Set the environment variables used by the docker-compose.yml through the `.env` file. The `sample.env` file provides a template for the production `.env` file. See [this docker-compose issue about the env_file value vs .env file](https://github.com/docker/compose/issues/4189).
+
+```
+cp example.env .env
+nano .env
+```
+
+##### contents of .env
+```
+POSTGRES_CKAN_DBNAME=ckan
+POSTGRES_CKAN_DATASTORE_DBNAME=datastore_default
+POSTGRES_HOST=ckandb.somehost.us-west-2.rds.amazonaws.com
+POSTGRES_PORT=5432
+POSTGRES_USER=ckandb_admin
+POSTGRES_DATASTORE_USER=datastore_default
+POSTGRES_DATASTORE_PASSWORD=the_read_only_password_for_datastore_default
+POSTGRES_PASSWORD=the_postgres_database_password
+PGPASSWORD=the_postgres_database_password
+CKAN_SITE_URL=http://some-instance.us-west-2.compute.amazonaws.com
+```
 
 
-example of regional data portal: opendatapilly.org
 
+#### Build and Run
 
+```
+docker-compose build
+docker-compose run -d
+```
 
-# architecture
- - disater recovery
- - automation
+##### Create the first user
+Once the ckan container is up and running, go to the site, create an account, then get shell access to the ckan container by running this command:
+```
+sudo docker exec -i -t ckan /bin/bash
+```
 
-# tooling
- - APIs
- - IoT
- - private/public tooling/validation
- - data security enforcement
- 
-# billing
+Once in, create an admin account for the user you just created by running this command:
 
+```
+paster sysadmin add <user name> -c /etc/ckan/default/production.ini
+```
 
-formalizing this:
-- creating an MOU
-
-
-fix for mapquest tiles:
-https://groups.google.com/forum/#!msg/ckan-global-user-group/kytuMOvhXLA/Ne9UD43vBAAJ
-https://github.com/ckan/ckan/pull/3174#issuecomment-237216080
+For more information on this process, see the CKAN documentation on [Creating a sysadmin user](http://docs.ckan.org/en/latest/maintaining/getting-started.html#create-admin-user).
