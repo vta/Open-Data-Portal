@@ -88,6 +88,26 @@ Create an IAM user to have access to the S3 bucket, then grant permissions to th
 
 Once permissions have been granted to the user to access the S3 bucket, create an access key for this user and note the Access key ID and Secret access key. These values are used in the `CLOUDSTORAGE_OPTIONS` value, as `key` and `secret`.
 
+Now add a bucket policy to [allow read access for anonymous users](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html#example-bucket-policies-use-case-2)
+
+```
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "AddPerm",
+			"Effect": "Allow",
+			"Principal": "*",
+			"Action": [
+				"s3:GetObject"
+			],
+			"Resource": [
+				"arn:aws:s3:::vta-open-data/*"
+			]
+		}
+	]
+}
+```
 
 ## Docker deployment to Amazon EC2
 Amazon EC2 Instance using Ubuntu 16.04 on a t2.medium
