@@ -89,7 +89,7 @@ Create an IAM user to have access to the S3 bucket, then grant permissions to th
 Once permissions have been granted to the user to access the S3 bucket, create an access key for this user and note the Access key ID and Secret access key. These values are used in the `CLOUDSTORAGE_OPTIONS` value, as `key` and `secret`.
 
 
-## CKAN
+## Docker deployment to Amazon EC2
 Amazon EC2 Instance using Ubuntu 16.04 on a t2.medium
 * 16 GB EBS GP2 SSD storage
 * SSH (22), HTTP (80), HTTPS (443) ports opened
