@@ -1,9 +1,15 @@
 [![Stories in Ready](https://badge.waffle.io/vta/Open-Data-Portal.svg?label=ready&title=Ready)](http://waffle.io/vta/Open-Data-Portal)
 
+
+<p align="center">
+  <img src="resources/VTA_logo.png?raw=true" height="70" alt="VTA logo"/>
+  <img src="http://www.clipartbest.com/cliparts/RTG/76r/RTG76rgTL.png" height="50" alt="heart"/>
+  <img src="resources/open_data_logo_sq.png?raw=true" height="70" alt="Open Data logo"/>
+</p>
+
+
 # Open Data Portal
-
-
-
+ <p>Powered by <img src="resources/CKAN_Logo_full_color.png?raw=true" height="25" alt="CKAN logo"/></p>
 
 ## PostgreSQL Database deployment to Amazon RDS
 Deployed using Amazon's RDS PostgreSQL service.
