@@ -109,6 +109,18 @@ Now add a bucket policy to [allow read access for anonymous users](https://docs.
 }
 ```
 
+Also edit the CORS Configuration to allow access from any origin. 
+```
+<CORSConfiguration>
+    <CORSRule>
+        <AllowedOrigin>*</AllowedOrigin>
+        <AllowedMethod>GET</AllowedMethod>
+        <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <AllowedHeader>*</AllowedHeader>
+    </CORSRule>
+</CORSConfiguration>
+```
+
 ## Docker deployment to Amazon EC2
 Amazon EC2 Instance using Ubuntu 16.04 on a t2.medium
 * 16 GB EBS GP2 SSD storage
