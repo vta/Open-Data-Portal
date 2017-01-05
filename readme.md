@@ -70,6 +70,24 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO "datastore_default";
 ALTER DEFAULT PRIVILEGES FOR USER "ckandb_admin" IN SCHEMA public
    GRANT SELECT ON TABLES TO "datastore_default";
 ```
+## S3 storage
+Create an IAM user to have access to the S3 bucket, then grant permissions to that user:
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": "arn:aws:s3:::vta-open-data/*"
+        }
+    ]
+}
+```
+
+Once permissions have been granted to the user to access the S3 bucket, create an access key for this user and note the Access key ID and Secret access key. These values are used in the `CLOUDSTORAGE_OPTIONS` value, as `key` and `secret`.
+
 
 ## CKAN
 Amazon EC2 Instance using Ubuntu 16.04 on a t2.medium
@@ -110,12 +128,11 @@ Log out and then log back in to complete the process (the group assignment needs
 
 ### Deploy the project
 
+Clone the project:
+```
 git clone https://github.com/vta/Open-Data-Portal
+```
 
-
-
-
-#### Environment Variables
 Set the environment variables used by the docker-compose.yml through the `.env` file. The `sample.env` file provides a template for the production `.env` file. See [this docker-compose issue about the env_file value vs .env file](https://github.com/docker/compose/issues/4189).
 
 ```
@@ -123,7 +140,7 @@ cp example.env .env
 nano .env
 ```
 
-##### contents of .env
+#### contents of .env
 ```
 POSTGRES_CKAN_DBNAME=ckan
 POSTGRES_CKAN_DATASTORE_DBNAME=datastore_default
@@ -135,6 +152,9 @@ POSTGRES_DATASTORE_PASSWORD=the_read_only_password_for_datastore_default
 POSTGRES_PASSWORD=the_postgres_database_password
 PGPASSWORD=the_postgres_database_password
 CKAN_SITE_URL=http://some-instance.us-west-2.compute.amazonaws.com
+CLOUDSTORAGE_DRIVER=S3_US_WEST
+CLOUDSTORAGE_NAME=vta-open-data
+CLOUDSTORAGE_OPTIONS={'key': 'IAM user key', 'secret': 'IAM user secret'}
 ```
 
 
@@ -161,7 +181,7 @@ docker ps
 docker logs ckan
 ```
 
-##### Create the first user
+#### Create the first user
 Once the ckan container is up and running, go to the site, create an account, then get shell access to the ckan container by running this command:
 ```
 sudo docker exec -i -t ckan /bin/bash
