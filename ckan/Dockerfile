@@ -31,6 +31,9 @@ RUN pip install virtualenvwrapper
 
 RUN /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh"
 
+# the data storage folder
+RUN mkdir -p /var/lib/ckan/default
+
 RUN mkdir -p /usr/lib/ckan/default && chown -R `whoami` /usr/lib/ckan/default
 
 WORKDIR /usr/lib/ckan/default
@@ -50,6 +53,10 @@ COPY ./resources/production.ini /etc/ckan/default/production.ini
 
 RUN pip install ckanext-geoview
 
+# ckanext-envvars plugin
+WORKDIR /usr/lib/ckan/
+RUN pip install 'ckanext-envvars==0.0.1'
+
 # ckanext-mapviews plugin
 # there are no release labels for this, so work only on a known-good commit
 WORKDIR /usr/lib/ckan/
@@ -63,6 +70,15 @@ RUN python setup.py install
 WORKDIR /usr/lib/ckan/default
 RUN pip install ckanext-pdfview
 
+# cloudstorage plugin
+# there are no release labels for this, so work only on a known-good commit
+WORKDIR /usr/lib/ckan/
+RUN pip install 'apache-libcloud==1.2.1'
+RUN pip install 'backports.ssl_match_hostname==3.5.0.1'
+RUN git clone https://github.com/open-data/ckanext-cloudstorage.git
+WORKDIR /usr/lib/ckan/ckanext-cloudstorage/
+RUN git checkout d354fc752a9d501a3f4696295a83794393e447fe
+RUN python setup.py install
 
 RUN ln -s /usr/lib/ckan/default/src/ckan/who.ini /etc/ckan/default/who.ini
 

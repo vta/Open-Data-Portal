@@ -1,6 +1,7 @@
 version: '2'
 services:
   nginx:
+    container_name : nginx
     image: nginx:1.11.8
     depends_on:
      - ckan
@@ -15,7 +16,7 @@ services:
     ports:
      - "8080:8080"
     volumes:
-     - ./data/ckan_storage:/var/lib/postgresql/data/ckan
+     - ./data/ckan_storage:/var/lib/ckan
     depends_on:
      - solr
     environment:
@@ -36,6 +37,9 @@ services:
        CKAN_STORAGE_PATH: "/var/lib/ckan"
        CKAN_DATAPUSHER_URL: "${CKAN_SITE_URL}:8800"
        CKAN_SOLR_URL: "http://solr:8983/solr/${POSTGRES_CKAN_DBNAME}"
+       CKANEXT__CLOUDSTORAGE__DRIVER: "${CLOUDSTORAGE_DRIVER}"
+       CKANEXT__CLOUDSTORAGE__CONTAINER_NAME: "${CLOUDSTORAGE_NAME}"
+       CKANEXT__CLOUDSTORAGE__DRIVER_OPTIONS: "${CLOUDSTORAGE_OPTIONS}"       
        SOLR_URL: "http://solr:8983/solr/${POSTGRES_CKAN_DBNAME}"
   datapusher:
     container_name: ckan_datapusher
@@ -45,6 +49,7 @@ services:
     depends_on:
      - ckan
   solr:
+    container_name : solr
     image: ckan/solr:latest
     ports:
      - "8983:8983"

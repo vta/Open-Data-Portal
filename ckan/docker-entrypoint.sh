@@ -23,6 +23,9 @@ cd /usr/lib/ckan/default/src/ckan
 paster db init -c /etc/ckan/default/production.ini
 # paster --plugin=ckanext-harvest harvester initdb --config=/etc/ckan/default/production.ini
 
-echo "starting CKAN server"
+echo "setting permissions on data storage folder"
+chown -R `whoami` /var/lib/ckan/default
+chmod u+rwx /var/lib/ckan/default
 
+echo "starting CKAN server"
 paster serve /etc/ckan/default/production.ini

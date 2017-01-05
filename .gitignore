@@ -1,3 +1,6 @@
 # this file is used by docker-compose
 # and contains secrets like database passwords
 .env
+
+# the CKAN data file, containing file uploads
+data
