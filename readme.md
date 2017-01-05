@@ -12,7 +12,7 @@ Currently using a db.m4.large instance for PostgreSQL (2 vCPU, 8GB RAM), with 50
 
 * DB Instance Identifier : ckandb
 * Master Username : ckandb_admin
-* Master Password : feP?U8AHaf&2e%re5eCha4?Z
+* Master Password : password_for_ckandb_admin
 * DB Parameter Group : default.postgres9.5
 * Database Name : ckan
 * Database Port : 5432
@@ -26,15 +26,19 @@ connection string:
 *Note:* For debugging purposes, it may be useful to open up the security groups to allow connections from any IP address to port 5432. For more information or if connection attempts to the database fails, check out [the Connecting to a DB Instance Running the PostgreSQL Database Engine documentation](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToPostgreSQLInstance.html).
 
 ### Create DataStore Database
-Create a database called datastore_default and a user called datastore_default with read-only access to that database.
+Create a database called `datastore_default` and a user called `datastore_default` with read-only access to that database.
+
+####Connect to the database:
 
 ```
-# connect to the database then grant access to user
 psql  --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER --dbname=$POSTGRES_CKAN_DBNAME
+```
+
+#### Grant access to user:
+```
+\connect datastore_default
 GRANT CONNECT ON DATABASE datastore_default TO datastore_default;
 GRANT USAGE ON SCHEMA public TO datastore_default;
-
-\connect datastore_default
 
 -- revoke permissions for the read-only user
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
@@ -63,11 +67,8 @@ ALTER DEFAULT PRIVILEGES FOR USER "ckandb_admin" IN SCHEMA public
 
 ## CKAN
 Amazon EC2 Instance using Ubuntu 16.04 on a t2.medium
-* vpc-69f1f10c subnet
-* vta_open_data IAM role
 * 16 GB EBS GP2 SSD storage
 * SSH (22), HTTP (80), HTTPS (443) ports opened
-* opendata_prod key pair
 
 ### Protect access to database
 Once the Amazon EC2 instance is set up, note its IP address and set the RDS Security Group's inbound rules to allow access to port 5432 only from the CKAN instance's IP address.
@@ -76,8 +77,8 @@ Once the Amazon EC2 instance is set up, note its IP address and set the RDS Secu
 ### Install dependencies
 
 To  ssh into the instance:
-copy opendata_prod.pem to ~/.ssh/opendata_prod.pem
 ```
+cp ~/Donwloads/opendata_prod.pem to ~/.ssh/opendata_prod.pem
 chmod 0400 ~/.ssh/opendata_prod.pem
 ssh -i ~/.ssh/opendata_prod.pem ubuntu@some-instance.us-west-2.compute.amazonaws.com
 ```
@@ -139,16 +140,26 @@ docker-compose build
 docker-compose run -d
 ```
 
+Check the status of the services using `docker`:
+
+##### list services:
+```
+docker ps
+```
+
+##### see logs for ckan:
+```
+docker logs ckan
+```
+
 ##### Create the first user
 Once the ckan container is up and running, go to the site, create an account, then get shell access to the ckan container by running this command:
 ```
 sudo docker exec -i -t ckan /bin/bash
 ```
 
-Once in, create an admin account for the user you just created by running this command:
+Once in, [create an admin account](http://docs.ckan.org/en/latest/maintaining/getting-started.html#create-admin-user) for the user you just created by running this command:
 
 ```
 paster sysadmin add <user name> -c /etc/ckan/default/production.ini
 ```
-
-For more information on this process, see the CKAN documentation on [Creating a sysadmin user](http://docs.ckan.org/en/latest/maintaining/getting-started.html#create-admin-user).
