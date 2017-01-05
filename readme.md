@@ -131,6 +131,7 @@ Log out and then log back in to complete the process (the group assignment needs
 Clone the project:
 ```
 git clone https://github.com/vta/Open-Data-Portal
+cd Open-Data-Portal
 ```
 
 Set the environment variables used by the docker-compose.yml through the `.env` file. The `sample.env` file provides a template for the production `.env` file. See [this docker-compose issue about the env_file value vs .env file](https://github.com/docker/compose/issues/4189).
