@@ -143,9 +143,12 @@ docker-compose run -d
 Check the status of the services using `docker`:
 
 ##### list services:
+There should be four docker containers running. This can be checked with the `ps` docker command:
 ```
 docker ps
 ```
+
+![docker ps](resources/docker_ps.png?raw=true)
 
 ##### see logs for ckan:
 ```
