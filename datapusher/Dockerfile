@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
   python-setuptools \
   build-essential \
   apache2 \
-  libapache2-mod-wsgi
+  libapache2-mod-wsgi \
+  psmisc
 
 RUN easy_install pip
 RUN pip install --upgrade pip
@@ -28,11 +29,13 @@ RUN mkdir /usr/lib/ckan/datapusher/src
 WORKDIR /usr/lib/ckan/datapusher/src
 
 #clone the source (always target the stable branch)
-RUN git clone -b stable https://github.com/ckan/datapusher.git
+RUN git clone https://github.com/ckan/datapusher.git
+WORKDIR /usr/lib/ckan/datapusher/src/datapusher
+RUN git checkout 0.0.9
 
 #install the DataPusher and its requirements
-WORKDIR /usr/lib/ckan/datapusher/src/datapusher
 RUN /usr/lib/ckan/datapusher/bin/pip install -r requirements.txt
+RUN pip install 'Flask-Login==0.2.11'
 RUN /usr/lib/ckan/datapusher/bin/python setup.py develop
 
 #copy the standard Apache config file
@@ -53,6 +56,7 @@ RUN cp deployment/datapusher_settings.py /etc/ckan/
 #to manually edit /etc/apache2/ports.conf.
 RUN sh -c 'echo "NameVirtualHost *:8800" >> /etc/apache2/ports.conf'
 RUN sh -c 'echo "Listen 8800" >> /etc/apache2/ports.conf'
+RUN sh -c 'echo "ServerName ${SERVER_NAME}" >> /etc/apache2/httpd.conf'
 
 #enable DataPusher Apache site
 RUN a2ensite datapusher

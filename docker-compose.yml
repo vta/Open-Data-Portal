@@ -48,8 +48,10 @@ services:
      - "8800:8800"
     depends_on:
      - ckan
+    environment:
+      SERVER_NAME: "${CKAN_SITE_URL}"
   solr:
     container_name : solr
-    image: ckan/solr:latest
+    image: ckan/solr:dev-v2.6
     ports:
      - "8983:8983"

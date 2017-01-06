@@ -17,4 +17,5 @@ if ! [ -d /var/log/httpd ]; then mkdir /var/log/httpd;fi
 if ! [ -d /var/lock/httpd ]; then mkdir /var/lock/httpd;fi
 
 #run Apache
+killall httpd
 apache2 -X
