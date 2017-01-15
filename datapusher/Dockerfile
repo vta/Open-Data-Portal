@@ -9,10 +9,7 @@ RUN apt-get update && apt-get install -y \
   libpq-dev \
   python-dev \
   python-setuptools \
-  build-essential \
-  apache2 \
-  libapache2-mod-wsgi \
-  psmisc
+  build-essential
 
 RUN easy_install pip
 RUN pip install --upgrade pip
@@ -21,46 +18,24 @@ RUN pip install virtualenvwrapper
 
 RUN /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh"
 
-#create a virtualenv for datapusher
 RUN virtualenv /usr/lib/ckan/datapusher
+RUN . /usr/lib/ckan/datapusher/bin/activate
 
-#create a source directory and switch to it
 RUN mkdir /usr/lib/ckan/datapusher/src
 WORKDIR /usr/lib/ckan/datapusher/src
 
-#clone the source (always target the stable branch)
 RUN git clone https://github.com/ckan/datapusher.git
 WORKDIR /usr/lib/ckan/datapusher/src/datapusher
 RUN git checkout 0.0.9
 
-#install the DataPusher and its requirements
-RUN /usr/lib/ckan/datapusher/bin/pip install -r requirements.txt
+RUN pip install -r requirements.txt
 RUN pip install 'Flask-Login==0.2.11'
-RUN /usr/lib/ckan/datapusher/bin/python setup.py develop
+RUN python setup.py develop
 
-#copy the standard Apache config file
-# (use deployment/datapusher.apache2-4.conf if you are running under Apache 2.4)
-RUN cp deployment/datapusher.apache2-4.conf /etc/apache2/sites-available/datapusher.conf
+RUN pip install gunicorn
 
-RUN mkdir -p /etc/ckan
+COPY ./datapusher_settings.py ./deployment/datapusher_settings.py
+COPY ./datapusher.wsgi ./datapusher.wsgi
 
-#copy the standard DataPusher wsgi file
-#(see note below if you are not using the default CKAN install location)
-RUN cp deployment/datapusher.wsgi /etc/ckan/
-
-#copy the standard DataPusher settings.
-RUN cp deployment/datapusher_settings.py /etc/ckan/
-
-#open up port 8800 on Apache where the DataPusher accepts connections.
-#make sure you only run these 2 functions once otherwise you will need
-#to manually edit /etc/apache2/ports.conf.
-RUN sh -c 'echo "NameVirtualHost *:8800" >> /etc/apache2/ports.conf'
-RUN sh -c 'echo "Listen 8800" >> /etc/apache2/ports.conf'
-RUN sh -c 'echo "ServerName ${SERVER_NAME}" >> /etc/apache2/httpd.conf'
-
-#enable DataPusher Apache site
-RUN a2ensite datapusher
-
-ADD apache_fg.sh /
-RUN chmod +x /apache_fg.sh
-CMD /apache_fg.sh
+EXPOSE 8800
+CMD ["gunicorn", "-b", "127.0.0.1:8800", "-t", "1000", "wsgi:app"]
