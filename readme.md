@@ -134,7 +134,7 @@ Once the Amazon EC2 instance is set up, note its IP address and set the RDS Secu
 
 To  ssh into the instance:
 ```
-cp ~/Donwloads/opendata_prod.pem ~/.ssh/opendata_prod.pem
+cp ~/Downloads/opendata_prod.pem ~/.ssh/opendata_prod.pem
 chmod 0400 ~/.ssh/opendata_prod.pem
 ssh -i ~/.ssh/opendata_prod.pem ubuntu@some-instance.us-west-2.compute.amazonaws.com
 ```
