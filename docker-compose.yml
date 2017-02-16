@@ -45,6 +45,8 @@ services:
   datapusher:
     container_name: ckan_datapusher
     build: ./datapusher/
+    ports:
+     - "8800:8800"
     depends_on:
      - ckan
     environment:
