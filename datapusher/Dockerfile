@@ -38,4 +38,4 @@ COPY ./datapusher_settings.py ./deployment/datapusher_settings.py
 COPY ./datapusher.wsgi ./datapusher.wsgi
 
 EXPOSE 8800
-CMD ["gunicorn", "-b", "127.0.0.1:8800", "-t", "1000", "wsgi:app"]
+CMD ["gunicorn", "--log-file=-", "-b", "0.0.0.0:8800", "-t", "1000", "wsgi:app"]
