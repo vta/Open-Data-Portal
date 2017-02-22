@@ -14,8 +14,8 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/job_store.db'
 
 # webserver host and port
 
-#HOST = '127.0.0.1'
-#PORT = 8800
+HOST = '0.0.0.0'
+PORT = 8800
 
 # logging
 
@@ -24,3 +24,6 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/job_store.db'
 
 #LOG_FILE = '/tmp/ckan_service.log'
 STDERR = True
+
+# cloud settings
+MAX_CONTENT_LENGTH = 73400320

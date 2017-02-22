@@ -1,41 +1,39 @@
-FROM ubuntu:14.04
-MAINTAINER  Kyle Falconer "kyle.falconer@vta.org"
+FROM keitaro/base:0.1
 
-#install requirements for the DataPusher
-RUN apt-get update && apt-get install -y \
-  libxslt1-dev \
-  libxml2-dev \
-  git \
-  libpq-dev \
-  python-dev \
-  python-setuptools \
-  build-essential
+# Forked from https://github.com/keitaroinc/docker-ckan-datapusher/blob/master/rootfs/Dockerfile
+MAINTAINER Keitaro Inc <info@keitaro.info>
 
-RUN easy_install pip
-RUN pip install --upgrade pip
-RUN pip install --upgrade virtualenv
-RUN pip install virtualenvwrapper
+ENV APP_DIR=/srv/app
+ENV GIT_BRANCH stable
+ENV GIT_URL https://github.com/ckan/datapusher.git
+ENV JOB_CONFIG ${APP_DIR}/datapusher_settings.py
 
-RUN /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh"
+WORKDIR ${APP_DIR}
 
-RUN virtualenv /usr/lib/ckan/datapusher
-RUN . /usr/lib/ckan/datapusher/bin/activate
+RUN apk add --no-cache python \
+    py-pip \
+    py-gunicorn \
+    libxslt && \
+    # Temporary packages to build CKAN requirements
+    apk add --no-cache --virtual .build-deps \
+    gcc \
+    git \
+    musl-dev \
+    python-dev \
+    libxml2-dev \
+    libxslt-dev && \
+    # Fetch datapusher and install
+    mkdir ${APP_DIR}/src && cd ${APP_DIR}/src && \
+    git clone -b ${GIT_BRANCH} --depth=1 --single-branch ${GIT_URL} && \
+    cd datapusher && \
+    python setup.py install && \
+    pip install --no-cache-dir -r requirements.txt && \
+    # Remove temporary packages and files
+    apk del .build-deps && \
+    rm -rf ${APP_DIR}/src
 
-RUN mkdir /usr/lib/ckan/datapusher/src
-WORKDIR /usr/lib/ckan/datapusher/src
+COPY setup ${APP_DIR}
 
-RUN git clone https://github.com/ckan/datapusher.git
-WORKDIR /usr/lib/ckan/datapusher/src/datapusher
-RUN git checkout 0.0.9
+EXPOSE 8000
 
-RUN pip install -r requirements.txt
-RUN pip install 'Flask-Login==0.2.11'
-RUN python setup.py develop
-
-RUN pip install gunicorn
-
-COPY ./datapusher_settings.py ./deployment/datapusher_settings.py
-COPY ./datapusher.wsgi ./datapusher.wsgi
-
-EXPOSE 8800
-CMD ["gunicorn", "-b", "127.0.0.1:8800", "-t", "1000", "wsgi:app"]
+CMD ["gunicorn", "--log-file=-", "-b", "0.0.0.0:8000", "wsgi"]

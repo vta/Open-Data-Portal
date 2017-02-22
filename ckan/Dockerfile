@@ -1,5 +1,4 @@
 FROM ubuntu:14.04
-MAINTAINER  Kyle Falconer "kyle.falconer@vta.org"
 
 # set the locale
 # this is important for database creation
@@ -81,6 +80,7 @@ RUN python setup.py install
 ###################################
 WORKDIR /usr/lib/ckan/default/src/ckan
 EXPOSE 8080
+EXPOSE 5000
 COPY ./docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 CMD ["/docker-entrypoint.sh"]

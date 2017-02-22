@@ -17,6 +17,7 @@ parser.add_argument("dataurl", type=str, help="Enter the URL for API")
 parser.add_argument("filename", type=str, help="Filename without extension")
 parser.add_argument("apikey", type=str, help="API Key for CKAN")
 parser.add_argument("packageid", type=str, help="Identifies the CKAN package to add resource to")
+parser.add_argument("path", type=str, help="Path where the data exists")
 parser.add_argument("-ua", "--useragent", type=str, help="User Agent for CKAN")
 
 args = parser.parse_args()
@@ -34,7 +35,7 @@ content = url.read()
 soup = BeautifulSoup(content, "html.parser")
 
 # Get the tags that contain the data
-data = soup("m:properties")
+data = soup(args.path)
 
 # Open csv file to read in the data
 with open(args.filename + ".csv", "w") as csvFile:
