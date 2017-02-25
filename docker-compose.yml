@@ -7,6 +7,7 @@ services:
      - ckan
     ports:
      - "80:80"
+     - "443:443"
     volumes:
      - ./nginx/odp.conf:/etc/nginx/conf.d/default.conf
   ckan:
@@ -35,7 +36,7 @@ services:
        CKAN_SITE_URL: "${CKAN_SITE_URL}"
        CKAN_SITE_ID: "default"
        CKAN_STORAGE_PATH: "/var/lib/ckan"
-       CKAN_DATAPUSHER_URL: "${CKAN_SITE_URL}:8800"
+       CKAN_DATAPUSHER_URL: "${CKAN_SITE_URL}:8000"
        CKAN_SOLR_URL: "http://solr:8983/solr/${POSTGRES_CKAN_DBNAME}"
        CKANEXT__CLOUDSTORAGE__DRIVER: "${CLOUDSTORAGE_DRIVER}"
        CKANEXT__CLOUDSTORAGE__CONTAINER_NAME: "${CLOUDSTORAGE_NAME}"
@@ -45,7 +46,7 @@ services:
     container_name: ckan_datapusher
     build: ./datapusher/
     ports:
-     - "8800:8800"
+     - "8000:8000"
     depends_on:
      - ckan
     environment:

@@ -1,66 +1,38 @@
-FROM ubuntu:14.04
-MAINTAINER  Kyle Falconer "kyle.falconer@vta.org"
+FROM keitaro/base:0.1
 
-#install requirements for the DataPusher
-RUN apt-get update && apt-get install -y \
-  libxslt1-dev \
-  libxml2-dev \
-  git \
-  libpq-dev \
-  python-dev \
-  python-setuptools \
-  build-essential \
-  apache2 \
-  libapache2-mod-wsgi \
-  psmisc
+# Forked from https://github.com/keitaroinc/docker-ckan-datapusher/blob/master/rootfs/Dockerfile
 
-RUN easy_install pip
-RUN pip install --upgrade pip
-RUN pip install --upgrade virtualenv
-RUN pip install virtualenvwrapper
+ENV APP_DIR=/srv/app
+ENV GIT_BRANCH master
+ENV GIT_URL https://github.com/vta/datapusher.git
+ENV JOB_CONFIG ${APP_DIR}/datapusher_settings.py
 
-RUN /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh"
+WORKDIR ${APP_DIR}
 
-#create a virtualenv for datapusher
-RUN virtualenv /usr/lib/ckan/datapusher
+RUN apk add --no-cache python \
+    py-pip \
+    py-gunicorn \
+    libxslt && \
+    # Temporary packages to build CKAN requirements
+    apk add --no-cache --virtual .build-deps \
+    gcc \
+    git \
+    musl-dev \
+    python-dev \
+    libxml2-dev \
+    libxslt-dev && \
+    # Fetch datapusher and install
+    mkdir ${APP_DIR}/src && cd ${APP_DIR}/src && \
+    git clone -b ${GIT_BRANCH} --depth=1 --single-branch ${GIT_URL} && \
+    cd datapusher && \
+    python setup.py install && \
+    pip install --no-cache-dir -r requirements.txt && \
+    # Remove temporary packages and files
+    apk del .build-deps && \
+    rm -rf ${APP_DIR}/src
 
-#create a source directory and switch to it
-RUN mkdir /usr/lib/ckan/datapusher/src
-WORKDIR /usr/lib/ckan/datapusher/src
+COPY setup ${APP_DIR}
 
-#clone the source (always target the stable branch)
-RUN git clone https://github.com/ckan/datapusher.git
-WORKDIR /usr/lib/ckan/datapusher/src/datapusher
-RUN git checkout 0.0.9
+EXPOSE 8000
 
-#install the DataPusher and its requirements
-RUN /usr/lib/ckan/datapusher/bin/pip install -r requirements.txt
-RUN pip install 'Flask-Login==0.2.11'
-RUN /usr/lib/ckan/datapusher/bin/python setup.py develop
-
-#copy the standard Apache config file
-# (use deployment/datapusher.apache2-4.conf if you are running under Apache 2.4)
-RUN cp deployment/datapusher.apache2-4.conf /etc/apache2/sites-available/datapusher.conf
-
-RUN mkdir -p /etc/ckan
-
-#copy the standard DataPusher wsgi file
-#(see note below if you are not using the default CKAN install location)
-RUN cp deployment/datapusher.wsgi /etc/ckan/
-
-#copy the standard DataPusher settings.
-RUN cp deployment/datapusher_settings.py /etc/ckan/
-
-#open up port 8800 on Apache where the DataPusher accepts connections.
-#make sure you only run these 2 functions once otherwise you will need
-#to manually edit /etc/apache2/ports.conf.
-RUN sh -c 'echo "NameVirtualHost *:8800" >> /etc/apache2/ports.conf'
-RUN sh -c 'echo "Listen 8800" >> /etc/apache2/ports.conf'
-RUN sh -c 'echo "ServerName ${SERVER_NAME}" >> /etc/apache2/httpd.conf'
-
-#enable DataPusher Apache site
-RUN a2ensite datapusher
-
-ADD apache_fg.sh /
-RUN chmod +x /apache_fg.sh
-CMD /apache_fg.sh
+CMD ["gunicorn", "--log-file=-", "-b", "0.0.0.0:8000", "wsgi"]
