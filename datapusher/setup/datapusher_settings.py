@@ -15,7 +15,7 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/job_store.db'
 # webserver host and port
 
 HOST = '0.0.0.0'
-PORT = 8080
+PORT = 8800
 
 # logging
 
