@@ -42,6 +42,13 @@ services:
        CKANEXT__CLOUDSTORAGE__CONTAINER_NAME: "${CLOUDSTORAGE_NAME}"
        CKANEXT__CLOUDSTORAGE__DRIVER_OPTIONS: "${CLOUDSTORAGE_OPTIONS}"       
        SOLR_URL: "http://solr:8983/solr/${POSTGRES_CKAN_DBNAME}"
+       EMAIL_TO: "${EMAIL_TO}"
+       ERROR_EMAIL_FROM: "${ERROR_EMAIL_FROM}"
+       CKAN_SMTP_SERVER: "${CKAN_SMTP_SERVER}"
+       CKAN_SMTP_STARTTLS: "${CKAN_SMTP_STARTTLS}"
+       CKAN_SMTP_USER: "${CKAN_SMTP_USER}"
+       CKAN_SMTP_PASSWORD: "${CKAN_SMTP_PASSWORD}"
+       CKAN_SMTP_MAIL_FROM: "${CKAN_SMTP_MAIL_FROM}"
   datapusher:
     container_name: ckan_datapusher
     build: ./datapusher/

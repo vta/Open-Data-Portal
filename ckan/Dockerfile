@@ -37,7 +37,7 @@ WORKDIR /usr/lib/ckan/default
 RUN virtualenv --no-site-packages /usr/lib/ckan/default
 RUN . /usr/lib/ckan/default/bin/activate
 
-RUN pip install -e 'git+https://github.com/ckan/ckan.git@ckan-2.6.0#egg=ckan'
+RUN pip install -e 'git+https://github.com/ckan/ckan.git@ckan-2.6.1#egg=ckan'
 #RUN git clone --branch ckan-2.6.0 https://github.com/ckan/ckan.git
 
 RUN pip install -r /usr/lib/ckan/default/src/ckan/requirements.txt
